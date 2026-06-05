@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block page_title %}Video Processing Dashboard{% endblock %}
+
+{% block content %}
+<section class="vehicle-showcase" aria-label="Vehicle analysis scenes">
+    <div class="showcase-copy">
+        <p class="eyebrow">Live vehicle intelligence</p>
+        <h2>Scan traffic footage with a visual ANPR workspace.</h2>
+        <p>Preview sample vehicle frames, upload new footage, and inspect processing jobs from one dashboard.</p>
+    </div>
+    <div class="showcase-stage">
+        <img id="showcase-image" src="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_1.jpg') }}" alt="Vehicle footage preview">
+        <div class="showcase-overlay">
+            <span id="showcase-title">Urban Traffic</span>
+            <small id="showcase-detail">Vehicle detection and plate OCR workflow</small>
+        </div>
+    </div>
+</section>
+
+<section class="vehicle-card-grid">
+    <button class="vehicle-card active" type="button" data-image="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_1.jpg') }}" data-title="Urban Traffic" data-detail="Vehicle detection and plate OCR workflow">
+        <img src="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_1.jpg') }}" alt="Urban traffic vehicle scene">
+        <span>Urban Traffic</span>
+    </button>
+    <button class="vehicle-card" type="button" data-image="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_2.jpg') }}" data-title="Road Monitoring" data-detail="Track vehicles across video frames">
+        <img src="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_2.jpg') }}" alt="Road monitoring vehicle scene">
+        <span>Road Monitoring</span>
+    </button>
+    <button class="vehicle-card" type="button" data-image="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_3.jpg') }}" data-title="Plate Review" data-detail="Review recognized plate candidates">
+        <img src="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_3.jpg') }}" alt="Plate review vehicle scene">
+        <span>Plate Review</span>
+    </button>
+    <button class="vehicle-card" type="button" data-image="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_4.jpg') }}" data-title="Output Preview" data-detail="Watch processed video output in-browser">
+        <img src="{{ url_for('static', filename='vehicle_gallery/vehicle_scene_4.jpg') }}" alt="Output preview vehicle scene">
+        <span>Output Preview</span>
+    </button>
+</section>
+
+<section class="dashboard-grid">
+    <form class="upload-panel" id="upload-form" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <div>
+            <h2>New Analysis</h2>
+            <p>Upload a traffic video and the system will create a processed output video plus a CSV of detected plate reads.</p>
+        </div>
+
+        <label class="file-drop" id="file-drop">
+            <span class="file-title">Choose video</span>
+            <span class="file-subtitle" id="file-subtitle">Drop a video here or browse from your computer</span>
+            <span class="file-meta">MP4, AVI, MOV, or MKV up to 512 MB</span>
+            <input id="video-input" type="file" name="video" accept=".mp4,.avi,.mov,.mkv,video/*" required>
+        </label>
+
+        <div class="selected-file" id="selected-file" hidden>
+            <strong id="selected-name"></strong>
+            <span id="selected-size"></span>
+        </div>
+
+        <button id="submit-button" type="submit" disabled>Start Processing</button>
+    </form>
+
+    <section class="info-panel">
+        <h2>Pipeline</h2>
+        <div class="pipeline-list">
+            <div><span>1</span><p>Vehicle detection</p></div>
+            <div><span>2</span><p>Tracking with SORT</p></div>
+            <div><span>3</span><p>Plate crop selection</p></div>
+            <div><span>4</span><p>OCR and CSV export</p></div>
+        </div>
+    </section>
+</section>
+
+<section class="jobs-section">
+    <div class="section-heading">
+        <h2>Recent Jobs</h2>
+        <p>Jobs are kept while this local server is running.</p>
+    </div>
+
+    {% if jobs %}
+        <div class="job-list">
+            {% for job in jobs %}
+                <a class="job-row" href="{{ url_for('result', job_id=job.id) if job.status == 'complete' else url_for('job_status', job_id=job.id) }}">
+                    <span class="job-main">
+                        <strong>{{ job.filename }}</strong>
+                        <small>{{ job.created_at }}</small>
+                    </span>
+                    <span class="status-pill {{ job.status }}">{{ job.status }}</span>
+                    <span class="job-progress">{{ job.progress }}%</span>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty">No jobs yet. Upload a video to begin.</p>
+    {% endif %}
+</section>
+
+<script>
+const form = document.querySelector("#upload-form");
+const drop = document.querySelector("#file-drop");
+const input = document.querySelector("#video-input");
+const subtitle = document.querySelector("#file-subtitle");
+const selected = document.querySelector("#selected-file");
+const selectedName = document.querySelector("#selected-name");
+const selectedSize = document.querySelector("#selected-size");
+const submitButton = document.querySelector("#submit-button");
+const validTypes = [".mp4", ".avi", ".mov", ".mkv"];
+
+function formatBytes(bytes) {
+    if (!bytes) return "0 MB";
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function showFile(file) {
+    const extension = `.${file.name.split(".").pop().toLowerCase()}`;
+    const isValid = validTypes.includes(extension);
+    selected.hidden = false;
+    selectedName.textContent = file.name;
+    selectedSize.textContent = `${formatBytes(file.size)} ${isValid ? "" : "- unsupported type"}`;
+    subtitle.textContent = isValid ? "Ready to start processing" : "Choose a supported video file";
+    submitButton.disabled = !isValid;
+    drop.classList.toggle("file-ready", isValid);
+    drop.classList.toggle("file-error", !isValid);
+}
+
+input.addEventListener("change", () => {
+    if (input.files.length) showFile(input.files[0]);
+});
+
+["dragenter", "dragover"].forEach((eventName) => {
+    drop.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        drop.classList.add("drag-over");
+    });
+});
+
+["dragleave", "drop"].forEach((eventName) => {
+    drop.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        drop.classList.remove("drag-over");
+    });
+});
+
+drop.addEventListener("drop", (event) => {
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    showFile(file);
+});
+
+form.addEventListener("submit", () => {
+    submitButton.disabled = true;
+    submitButton.textContent = "Uploading...";
+});
+
+const showcaseImage = document.querySelector("#showcase-image");
+const showcaseTitle = document.querySelector("#showcase-title");
+const showcaseDetail = document.querySelector("#showcase-detail");
+const vehicleCards = document.querySelectorAll(".vehicle-card");
+
+vehicleCards.forEach((card) => {
+    card.addEventListener("click", () => {
+        vehicleCards.forEach((item) => item.classList.remove("active"));
+        card.classList.add("active");
+        showcaseImage.src = card.dataset.image;
+        showcaseTitle.textContent = card.dataset.title;
+        showcaseDetail.textContent = card.dataset.detail;
+    });
+});
+</script>
+{% endblock %}

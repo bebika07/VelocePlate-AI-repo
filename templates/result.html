@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block page_title %}Analysis Results{% endblock %}
+
+{% block content %}
+<section class="result-toolbar">
+    <div>
+        <p class="eyebrow">Completed {{ job.finished_at }}</p>
+        <h2>{{ job.filename }}</h2>
+    </div>
+    <div class="actions">
+        <a class="button secondary" href="{{ url_for('index') }}">Dashboard</a>
+        <a class="button" href="{{ url_for('download_file', job_id=job.id, filename='results.csv') }}">Download CSV</a>
+    </div>
+</section>
+
+<section class="metrics-grid">
+    <div class="metric-card">
+        <span class="metric">{{ total_rows }}</span>
+        <span class="label">plate reads</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric">{{ unique_plates|length }}</span>
+        <span class="label">unique plates</span>
+    </div>
+    <div class="plate-strip">
+        <span class="plate-strip-title">Review Pages</span>
+        <p>Open detailed OCR candidates or the full result preview separately.</p>
+        <div class="inline-actions">
+            <a class="button secondary" href="{{ url_for('plate_candidates', job_id=job.id) }}">Plate Candidates</a>
+            <a class="button secondary" href="{{ url_for('results_preview', job_id=job.id) }}">Results Preview</a>
+        </div>
+    </div>
+</section>
+
+<section class="video-section">
+    <div class="preview-header">
+        <div>
+            <h2>Processed Video Preview</h2>
+            <p>This preview is streamed from the processed output, so it stays visible even if the MP4 codec is not playable in the browser.</p>
+        </div>
+    </div>
+    <img class="video-preview" src="{{ url_for('video_preview', job_id=job.id) }}" alt="Processed output video preview">
+</section>
+
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block page_title %}Account Settings{% endblock %}
+
+{% block content %}
+<section class="account-layout">
+    <form class="account-panel login-form auth-form" method="post">
+        <div>
+            <p class="eyebrow">Console access</p>
+            <h2>Update username, email, or password</h2>
+            <p>Confirm your current password before changing account details.</p>
+        </div>
+
+        <label>
+            <span>Username</span>
+            <input type="text" name="username" value="{{ current_username }}" autocomplete="username" required>
+        </label>
+        <label>
+            <span>Email</span>
+            <input type="email" name="email" value="{{ current_email }}" autocomplete="email" required>
+        </label>
+        <label>
+            <span>Current password</span>
+            <span class="password-control">
+                <input class="password-input" type="password" name="current_password" autocomplete="current-password" required>
+                <button class="password-toggle" type="button" aria-label="Show password">Show</button>
+            </span>
+        </label>
+        <label>
+            <span>New password</span>
+            <span class="password-control">
+                <input class="password-input" type="password" name="new_password" autocomplete="new-password" placeholder="Leave blank to keep current password">
+                <button class="password-toggle" type="button" aria-label="Show password">Show</button>
+            </span>
+        </label>
+        <label>
+            <span>Confirm new password</span>
+            <span class="password-control">
+                <input class="password-input" type="password" name="confirm_password" autocomplete="new-password">
+                <button class="password-toggle" type="button" aria-label="Show password">Show</button>
+            </span>
+        </label>
+        <button type="submit">Save Settings</button>
+    </form>
+
+    <aside class="account-aside">
+        <span class="account-avatar">{{ current_username[:1]|upper }}</span>
+        <h2>{{ current_username }}</h2>
+        <p class="account-email">{{ current_email }}</p>
+        <p>This is the active local admin account for uploads, live camera access, and result exports.</p>
+        <div class="account-points">
+            <div><span></span>Password hash storage</div>
+            <div><span></span>Session-based access</div>
+            <div><span></span>Editable login details</div>
+        </div>
+
+        <form class="account-action-form" action="{{ url_for('logout') }}" method="post">
+            <button type="submit">Logout</button>
+        </form>
+
+        <form class="account-action-form danger-zone" action="{{ url_for('delete_account') }}" method="post">
+            <h2>Delete account</h2>
+            <p>This removes your signup record from both JSON and CSV storage.</p>
+            <label>
+                <span>Current password</span>
+                <span class="password-control">
+                    <input class="password-input" type="password" name="delete_password" autocomplete="current-password" required>
+                    <button class="password-toggle" type="button" aria-label="Show password">Show</button>
+                </span>
+            </label>
+            <button class="danger-button" type="submit">Delete Account</button>
+        </form>
+    </aside>
+</section>
+
+<script>
+document.querySelectorAll(".password-toggle").forEach((button) => {
+    button.addEventListener("click", () => {
+        const input = button.closest(".password-control").querySelector(".password-input");
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        button.textContent = showing ? "Show" : "Hide";
+        button.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block page_title %}Results Preview{% endblock %}
+
+{% block content %}
+<section class="result-toolbar">
+    <div>
+        <p class="eyebrow">From {{ job.filename }}</p>
+        <h2>OCR Result Preview</h2>
+    </div>
+    <div class="actions">
+        <a class="button secondary" href="{{ url_for('result', job_id=job.id) }}">Back to Results</a>
+        <a class="button" href="{{ url_for('download_file', job_id=job.id, filename='results.csv') }}">Download CSV</a>
+    </div>
+</section>
+
+<section class="metrics-grid plates-metrics">
+    <div class="metric-card">
+        <span class="metric">{{ total_rows }}</span>
+        <span class="label">total rows</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric">{{ unique_plates|length }}</span>
+        <span class="label">unique candidates</span>
+    </div>
+</section>
+
+<section class="table-section">
+    <div class="section-heading">
+        <h2>Results Preview</h2>
+        <p>Showing up to the first 100 rows.</p>
+    </div>
+
+    {% if rows %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Frame</th>
+                        <th>Car ID</th>
+                        <th>Plate</th>
+                        <th>OCR Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td>{{ row.frame_number }}</td>
+                            <td>{{ row.car_id }}</td>
+                            <td><strong>{{ row.license_number }}</strong></td>
+                            <td>{{ "%.2f"|format(row.license_number_score) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty">No rows to preview.</p>
+    {% endif %}
+</section>
+{% endblock %}

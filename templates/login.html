@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign In | PlateVision</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <section class="auth-visual">
+            <div class="auth-badge">PlateVision</div>
+            <h1>Secure access for vehicle plate analysis.</h1>
+            <p>Upload footage, monitor processing, review detected plates, and export results from one local dashboard.</p>
+            <div class="auth-stats">
+                <div><strong>YOLOv8</strong><span>vehicle detection</span></div>
+                <div><strong>EasyOCR</strong><span>plate reading</span></div>
+                <div><strong>CSV</strong><span>result export</span></div>
+            </div>
+        </section>
+
+        <section class="auth-card">
+            <form method="post" class="login-form">
+                <div>
+                    <p class="eyebrow">Authorized users only</p>
+                    <h2>Sign in</h2>
+                </div>
+
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="alerts">
+                            {% for message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <label>
+                    <span>Username or email</span>
+                    <input type="text" name="username" autocomplete="username" required autofocus>
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input type="password" name="password" autocomplete="current-password" required>
+                </label>
+                <button type="submit">Enter Console</button>
+                <div class="auth-links">
+                    <p class="auth-hint">Use the username/email and password created during signup.</p>
+                    <a href="{{ url_for('signup') }}">Create account</a>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

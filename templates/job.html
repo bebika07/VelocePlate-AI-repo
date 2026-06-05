@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block page_title %}Processing Job{% endblock %}
+
+{% block content %}
+<section class="status-panel" data-job-id="{{ job.id }}">
+    <div class="status-copy">
+        <p class="eyebrow" id="status-label">{{ job.status }}</p>
+        <h2>{{ job.filename }}</h2>
+        <p id="frame-label">Waiting for frame information...</p>
+    </div>
+
+    <div class="progress-shell">
+        <div class="progress-bar" id="progress-bar" style="width: {{ job.progress }}%"></div>
+    </div>
+    <div class="progress-meta">
+        <span id="progress-percent">{{ job.progress }}%</span>
+        <span id="error-message"></span>
+    </div>
+
+    <div class="actions">
+        <a class="button secondary" href="{{ url_for('index') }}">Back to Dashboard</a>
+        <a class="button disabled" id="result-link" href="#">View Results</a>
+    </div>
+</section>
+
+<script>
+const panel = document.querySelector(".status-panel");
+const jobId = panel.dataset.jobId;
+const statusLabel = document.querySelector("#status-label");
+const frameLabel = document.querySelector("#frame-label");
+const progressBar = document.querySelector("#progress-bar");
+const progressPercent = document.querySelector("#progress-percent");
+const errorMessage = document.querySelector("#error-message");
+const resultLink = document.querySelector("#result-link");
+
+async function refreshJob() {
+    const response = await fetch(`/api/jobs/${jobId}`);
+    const job = await response.json();
+
+    statusLabel.textContent = job.status;
+    progressBar.style.width = `${job.progress}%`;
+    progressPercent.textContent = `${job.progress}%`;
+
+    if (job.total_frames) {
+        frameLabel.textContent = `Processed ${job.current_frame} of ${job.total_frames} frames.`;
+    }
+
+    if (job.status === "complete") {
+        resultLink.classList.remove("disabled");
+        resultLink.href = job.result_url;
+        window.location.href = job.result_url;
+        return;
+    }
+
+    if (job.status === "failed") {
+        errorMessage.textContent = job.error;
+        resultLink.textContent = "Processing Failed";
+        return;
+    }
+
+    window.setTimeout(refreshJob, 1500);
+}
+
+refreshJob();
+</script>
+{% endblock %}

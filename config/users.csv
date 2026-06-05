@@ -1,0 +1,2 @@
+id,username,email,password_hash,created_at,updated_at
+3a27629f33e748a7a1c8feba8887ff17,bebika,bebikapatil@gmail.com,scrypt:32768:8:1$ysjNOUUcNAW3lP7r$8c1f5fc07e82cf9875988a090c9496e46c6af0c7be793f4a396b2a411c0ad598b47f23663878ee017608e51f0182be80951d11247006b41b1b151cfb16f5bf78,2026-05-15T21:49:06,2026-05-15T21:49:06

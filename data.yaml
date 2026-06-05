@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../val/images
+test: ../test/images
+
+nc: 1
+names: ['License Plate']
+
+roboflow:
+  workspace: licence-plate-3jqkb
+  project: license-plate-az47f
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/licence-plate-3jqkb/license-plate-az47f/dataset/1

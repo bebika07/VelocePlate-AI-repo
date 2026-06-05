@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block page_title %}Plate Candidates{% endblock %}
+
+{% block content %}
+<section class="result-toolbar">
+    <div>
+        <p class="eyebrow">From {{ job.filename }}</p>
+        <h2>Recognized Plate Candidates</h2>
+    </div>
+    <div class="actions">
+        <a class="button secondary" href="{{ url_for('result', job_id=job.id) }}">Back to Results</a>
+        <a class="button" href="{{ url_for('download_file', job_id=job.id, filename='results.csv') }}">Download CSV</a>
+    </div>
+</section>
+
+<section class="metrics-grid plates-metrics">
+    <div class="metric-card">
+        <span class="metric">{{ unique_plates|length }}</span>
+        <span class="label">unique candidates</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric">{{ total_rows }}</span>
+        <span class="label">total OCR reads</span>
+    </div>
+</section>
+
+<section class="plate-page-panel">
+    {% if unique_plates %}
+        <div class="candidate-grid">
+            {% for plate in unique_plates %}
+                <span class="candidate-chip">{{ plate }}</span>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty">No readable plates were detected.</p>
+    {% endif %}
+</section>
+{% endblock %}

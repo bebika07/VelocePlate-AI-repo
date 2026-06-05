@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block page_title %}Live Camera Detection{% endblock %}
+
+{% block content %}
+<section class="live-layout">
+    <div class="live-panel">
+        <div class="preview-header">
+            <div>
+                <p class="eyebrow">Real-time ANPR</p>
+                <h2>Live Vehicle Detection</h2>
+                <p>The stream uses your server webcam through OpenCV and draws detections directly on the live feed.</p>
+            </div>
+            <span class="live-badge">Live</span>
+        </div>
+
+        <div class="live-frame">
+            <img id="live-stream" src="{{ url_for('live_feed') }}" alt="Live camera vehicle detection stream">
+        </div>
+    </div>
+
+    <aside class="live-controls">
+        <h2>Camera Controls</h2>
+        <label>
+            <span>Camera Index</span>
+            <input id="camera-index" type="number" min="0" value="0">
+        </label>
+        <label>
+            <span>Detection Interval</span>
+            <select id="detection-interval">
+                <option value="5" selected>Every 5 frames</option>
+                <option value="3">Every 3 frames</option>
+                <option value="1">Every frame</option>
+                <option value="10">Every 10 frames</option>
+            </select>
+        </label>
+        <button type="button" id="apply-camera">Restart Stream</button>
+        <p>Use a higher interval if your CPU is slow. The page must stay open while live detection is running.</p>
+    </aside>
+</section>
+
+<script>
+const stream = document.querySelector("#live-stream");
+const cameraIndex = document.querySelector("#camera-index");
+const detectionInterval = document.querySelector("#detection-interval");
+const applyCamera = document.querySelector("#apply-camera");
+
+applyCamera.addEventListener("click", () => {
+    const camera = encodeURIComponent(cameraIndex.value || "0");
+    const every = encodeURIComponent(detectionInterval.value || "5");
+    stream.src = `/live-feed?camera=${camera}&every=${every}&t=${Date.now()}`;
+});
+</script>
+{% endblock %}
